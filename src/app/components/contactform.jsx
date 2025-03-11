@@ -1,23 +1,23 @@
-"use client"
+"use client";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useState } from 'react';
+
 export default function ContactForm() {
     const [fullname, setFullname] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
-    const [error, setError] = useState([]);
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Name:', fullname);
-        console.log('Email:', email);
-        console.log('Message:', message);
 
-        alert("Message sent successfully");
+        // Basic validation
+        if (!fullname || !email || !message) {
+            setError('Please fill in all fields.');
+            return;
+        }
 
-
-
-        const res = await fetch('api/contact', {
+        const res = await fetch('/api/contact', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -25,13 +25,20 @@ export default function ContactForm() {
             body: JSON.stringify({ fullname, email, message })
         });
 
-        const { msg } = await res.json();
-        setError(msg);
-        console.log(error);
+        if (!res.ok) {
+            // If the response is not okay, handle the error
+            const errorData = await res.text(); // Get the error response as text
+            setError(`Error: ${errorData}`);
+            return;
+        }
 
+        const data = await res.json();
+        if (data.msg) {
+            alert(data.msg);
+        } else {
+            setError('An unexpected error occurred.');
+        }
     };
-
-
 
     return (
         <>
@@ -44,7 +51,7 @@ export default function ContactForm() {
                     </div>
                     <div className="mb-3">
                         <label htmlFor="email" className="form-label">Email</label>
-                        <input onChange={(e) => setEmail(e.target.value)} type="email" id="email" className="form-control" placeholder="z0V8o@example.com" />
+                        <input onChange={(e) => setEmail(e.target.value)} type="email" id="email" className="form-control" placeholder="example@example.com" />
                     </div>
                     <div className="mb-3">
                         <label htmlFor="message" className="form-label">Message</label>
@@ -53,12 +60,13 @@ export default function ContactForm() {
                     <button type="submit" className="btn btn-primary">Send</button>
                 </form>
 
-
-                <div className="mt-3">
-                    <div className="alert alert-danger" role="alert">
-                        Error message
+                {error && (
+                    <div className="mt-3">
+                        <div className="alert alert-danger" role="alert">
+                            {error}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </>
     );

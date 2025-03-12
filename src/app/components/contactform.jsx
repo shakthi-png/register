@@ -14,8 +14,11 @@ export default function ContactForm() {
         // Basic validation
         if (!fullname || !email || !message) {
             setError('Please fill in all fields.');
+            console.log('Form submission error: All fields are required.'); // Log error
             return;
         }
+
+        console.log('Submitting form with data:', { fullname, email, message }); // Log form data
 
         const res = await fetch('/api/contact', {
             method: 'POST',
@@ -25,18 +28,24 @@ export default function ContactForm() {
             body: JSON.stringify({ fullname, email, message })
         });
 
+        console.log('API response status:', res.status); // Log response status
+
         if (!res.ok) {
             // If the response is not okay, handle the error
             const errorData = await res.text(); // Get the error response as text
             setError(`Error: ${errorData}`);
+            console.log('Error response from API:', errorData); // Log error response
             return;
         }
 
         const data = await res.json();
+        console.log('API response data:', data); // Log response data
+
         if (data.msg) {
             alert(data.msg);
         } else {
             setError('An unexpected error occurred.');
+            console.log('Unexpected response structure:', data); // Log unexpected structure
         }
     };
 

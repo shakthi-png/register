@@ -4,10 +4,9 @@ const connectDB = async () => {
     try {
         // Check if already connected
         if (mongoose.connection.readyState === 0) {
-            await mongoose.connect(process.env.MONGODB_URL, {
+            await mongoose.connect("mongodb+srv://shakthir9380:P7an73Vna0fUXK0R@cluster0.1u0cs.mongodb.net/contact_db", {
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
-                serverSelectionTimeoutMS: 60000, // Set a longer timeout (10 seconds)
             });
             console.log("Connected to MongoDB");
         }

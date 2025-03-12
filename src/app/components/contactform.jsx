@@ -1,6 +1,8 @@
 "use client";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ContactForm() {
     const [fullname, setFullname] = useState('');
@@ -13,12 +15,13 @@ export default function ContactForm() {
 
         // Basic validation
         if (!fullname || !email || !message) {
-            setError('Please fill in all fields.');
-            console.log('Form submission error: All fields are required.'); // Log error
+            const errorMessage = 'Please fill in all fields.';
+            setError(errorMessage);
+            toast.error(errorMessage); // Show toast notification
             return;
         }
 
-        console.log('Submitting form with data:', { fullname, email, message }); // Log form data
+        console.log('Submitting form with data:', { fullname, email, message });
 
         const res = await fetch('/api/contact', {
             method: 'POST',
@@ -28,24 +31,25 @@ export default function ContactForm() {
             body: JSON.stringify({ fullname, email, message })
         });
 
-        console.log('API response status:', res.status); // Log response status
+        console.log('API response status:', res.status);
 
         if (!res.ok) {
-            // If the response is not okay, handle the error
-            const errorData = await res.text(); // Get the error response as text
+            const errorData = await res.text();
             setError(`Error: ${errorData}`);
-            console.log('Error response from API:', errorData); // Log error response
+            toast.error(`Error: ${errorData}`); // Show toast notification
             return;
         }
 
         const data = await res.json();
-        console.log('API response data:', data); // Log response data
+        console.log('API response data:', data);
 
         if (data.msg) {
-            alert(data.msg);
+            toast.success(data.msg); // Show success toast
         } else {
-            setError('An unexpected error occurred.');
-            console.log('Unexpected response structure:', data); // Log unexpected structure
+            const unexpectedError = 'An unexpected error occurred.';
+            setError(unexpectedError);
+            toast.error(unexpectedError); // Show toast notification
+            console.log('Unexpected response structure:', data);
         }
     };
 
@@ -68,14 +72,7 @@ export default function ContactForm() {
                     </div>
                     <button type="submit" className="btn btn-primary">Send</button>
                 </form>
-
-                {error && (
-                    <div className="mt-3">
-                        <div className="alert alert-danger" role="alert">
-                            {error}
-                        </div>
-                    </div>
-                )}
+                <ToastContainer /> {/* Toast Container for notifications */}
             </div>
         </>
     );

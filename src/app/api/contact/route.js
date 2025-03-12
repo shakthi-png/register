@@ -3,12 +3,20 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import Contact from "@/app/models/contact";
 
+const connectWithTimeout = (timeout = 50000) => {
+    return Promise.race([
+        connectDB(),
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Database connection timed out")), timeout)
+        )
+    ]);
+};
+
 export async function POST(req) {
-    // Assuming req is treated as 'any'
     const { fullname, email, message } = await req.json();
 
     try {
-        await connectDB();
+        await connectWithTimeout(); // Use the new connectWithTimeout function
         await Contact.create({ fullname, email, message });
 
         return NextResponse.json({
@@ -20,6 +28,7 @@ export async function POST(req) {
             const errorList = Object.values(error.errors).map(e => e.message);
             return NextResponse.json({ msg: errorList, success: false });
         } else {
+            console.error("Error:", error); // Log the error for debugging
             return NextResponse.json({
                 msg: "An unexpected error occurred.",
                 error: error.message,
